@@ -61,14 +61,17 @@ router.get('/profile', auth, async (req, res) => {
         // Calculate group-specific data
         const groupStats = joinedGroups.map(group => {
             let membersPoints = [];
-            for (const [userId, points] of group.pointsMap.entries()) {
-                membersPoints.push({ userId, points });
+            // group.pointsMap is a plain object because of .lean()
+            if (group.pointsMap) {
+                for (const [userId, points] of Object.entries(group.pointsMap)) {
+                    membersPoints.push({ userId, points });
+                }
             }
             membersPoints.sort((a, b) => b.points - a.points);
 
             const userEntryIndex = membersPoints.findIndex(m => m.userId.toString() === req.user.id);
             const rank = userEntryIndex !== -1 ? userEntryIndex + 1 : null;
-            const pointsInGroup = group.pointsMap.get(req.user.id) || 0;
+            const pointsInGroup = group.pointsMap ? (group.pointsMap[req.user.id] || 0) : 0;
 
             return {
                 groupId: group._id,
