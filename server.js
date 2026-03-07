@@ -6,6 +6,7 @@ const cookieParser = require('cookie-parser');
 const compression = require('compression');
 const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
+const botChecker = require('./middleware/botChecker');
 
 const app = express();
 const http = require('http');
@@ -30,11 +31,12 @@ app.use(helmet()); // Set security headers
 app.use(compression()); // Compress responses using gzip
 app.use(express.json());
 app.use(cookieParser());
+app.use(botChecker); // Check for bots globally
 
 // Global Rate Limiting
 const limiter = rateLimit({
     windowMs: 15 * 60 * 1000, // 15 minutes
-    max: 200, // Limit each IP to 200 requests per `window` (here, per 15 minutes)
+    max: 100, // Limit each IP to 100 requests per `window` (here, per 15 minutes)
     standardHeaders: true, // Return rate limit info in the `RateLimit-*` headers
     legacyHeaders: false, // Disable the `X-RateLimit-*` headers
     message: "Too many requests from this IP, please try again after 15 minutes."
